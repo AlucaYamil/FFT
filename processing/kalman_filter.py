@@ -10,7 +10,7 @@ class Kalman1D:
         self.R = np.array([[r_measure]])
         self.I = np.eye(2)
 
-    def update(self, z: float) -> tuple[float,float]:
+    def update(self, z: float) -> tuple[float, float]:
         self.x = self.F @ self.x
         self.P = self.F @ self.P @ self.F.T + self.Q
         S = self.H @ self.P @ self.H.T + self.R
@@ -18,6 +18,6 @@ class Kalman1D:
         y = np.array([[z]]) - self.H @ self.x
         self.x = self.x + K @ y
         self.P = (self.I - K @ self.H) @ self.P
-        s_est = float(self.x[0,0])
-        b_est = float(self.x[1,0])
+        s_est = float(self.x[0, 0])
+        b_est = float(self.x[1, 0])
         return s_est, b_est

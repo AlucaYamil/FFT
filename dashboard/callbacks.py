@@ -5,7 +5,15 @@ import plotly.graph_objects as go
 from dash.dependencies import Input, Output
 
 from dash import callback
-from acquisition.udp_receiver import setup_udp, receive_batch
+import os
+
+if os.getenv("SIMULATED_DATA", "0") == "1":
+    from acquisition import simulator as data_source
+else:
+    from acquisition import udp_receiver as data_source
+
+setup_udp = data_source.setup_udp
+receive_batch = data_source.receive_batch
 from processing.integration    import accel_to_velocity
 from processing.spectrum       import fft_mag
 from processing.metrics        import rms, magnitude_mm_s
@@ -80,7 +88,7 @@ def update_dashboard(_n_intervals, _rpm, iso_group):
     fig4.update_layout(xaxis_title="Muestras", yaxis_title="RMS (mm/s)", template="plotly_white")
 
     last = buf_rms[-1] if buf_rms else 0
-    peak = f_fft[a_fft.argmax()] if (a_fft and len(a_fft)) else 0
+    peak = f_fft[a_fft.argmax()] if (a_fft is not None and len(a_fft) > 0) else 0
     diag = iso_zone(last, iso_group)
 
     return (

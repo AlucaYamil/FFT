@@ -4,17 +4,14 @@ import numpy as np
 from settings import HW
 from processing.integration import accel_to_vel_rms
 FS_HZ = HW.SAMPLE_RATE
-PORT = 9000
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.bind(("0.0.0.0", PORT))     # ← ¡IMPRESCINDIBLE!
-sock.settimeout(1.0)
-print(f"[listener_udp] escuchando en puerto {PORT}…")
+
 
 def setup_udp(ip: str, port: int, timeout: float = 0.2):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind((ip, port))
     sock.settimeout(timeout)
+    print(f"[listener_udp] escuchando en puerto {port}…")
     return sock
 
 def receive_batch(sock):
