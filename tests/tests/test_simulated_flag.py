@@ -3,7 +3,9 @@ import os
 import socket
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+# Add project root to Python path so test can import local packages
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, PROJECT_ROOT)
 
 import acquisition
 import config
