@@ -1,8 +1,9 @@
 import numpy as np
 
+
 class Kalman1D:
     def __init__(self, q_signal=1e-3, q_bias=1e-6, r_measure=1e-2):
-        self.x = np.zeros((2,1))
+        self.x = np.zeros((2, 1))
         self.P = np.eye(2)
         self.F = np.eye(2)
         self.Q = np.diag([q_signal, q_bias])

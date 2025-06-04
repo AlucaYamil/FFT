@@ -1,3 +1,7 @@
-# dashboard/__init__.py
-# Al importar "dashboard", se ejecuta callbacks.py y queda todo registrado
-from .callbacks import *
+"""Inicializa los callbacks de la aplicación."""
+
+from __future__ import annotations
+
+from . import callbacks
+
+__all__ = ["callbacks"]

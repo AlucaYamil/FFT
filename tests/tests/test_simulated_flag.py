@@ -2,27 +2,25 @@ import importlib
 import os
 import socket
 import sys
-import threading
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
+import acquisition
 import config
 
 
-def _reload():
+def reload_acquisition() -> None:
     importlib.reload(config)
-    import acquisition.udp_receiver as ur
-    import dashboard.callbacks as cb
-
-    importlib.reload(ur)
-    importlib.reload(cb)
-    return cb
+    importlib.reload(acquisition)
 
 
 def test_no_socket_when_simulated(monkeypatch):
     created = []
 
     class DummySocket:
+        def __init__(self, *a, **k):
+            created.append("socket")
+
         def setsockopt(self, *a, **k):
             pass
 
@@ -32,23 +30,10 @@ def test_no_socket_when_simulated(monkeypatch):
         def settimeout(self, *a, **k):
             pass
 
-    def fake_socket(*a, **k):
-        created.append("socket")
-        return DummySocket()
-
     monkeypatch.setenv("SIMULATED_DATA", "1")
-    monkeypatch.setattr(socket, "socket", fake_socket)
-
-    class DummyThread:
-        def __init__(self, target, daemon=False):
-            self.target = target
-
-        def start(self):
-            pass
-
-    monkeypatch.setattr(threading, "Thread", DummyThread)
-    cb = _reload()
-    cb.start_acquisition()
+    monkeypatch.setattr(socket, "socket", DummySocket)
+    reload_acquisition()
+    acquisition.setup()
     assert created == []
 
 
@@ -56,6 +41,9 @@ def test_socket_created_when_real(monkeypatch):
     created = []
 
     class DummySocket:
+        def __init__(self, *a, **k):
+            created.append("socket")
+
         def setsockopt(self, *a, **k):
             pass
 
@@ -65,21 +53,8 @@ def test_socket_created_when_real(monkeypatch):
         def settimeout(self, *a, **k):
             pass
 
-    def fake_socket(*a, **k):
-        created.append("socket")
-        return DummySocket()
-
     monkeypatch.setenv("SIMULATED_DATA", "0")
-    monkeypatch.setattr(socket, "socket", fake_socket)
-
-    class DummyThread:
-        def __init__(self, target, daemon=False):
-            self.target = target
-
-        def start(self):
-            pass
-
-    monkeypatch.setattr(threading, "Thread", DummyThread)
-    cb = _reload()
-    cb.start_acquisition()
+    monkeypatch.setattr(socket, "socket", DummySocket)
+    reload_acquisition()
+    acquisition.setup()
     assert created.count("socket") == 1

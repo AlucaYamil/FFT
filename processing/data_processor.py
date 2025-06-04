@@ -1,9 +1,10 @@
 import numpy as np
 from processing.kalman_filter import Kalman1D
-from processing.integration   import accel_to_velocity
-from processing.metrics       import rms, magnitude_mm_s
+from processing.integration import accel_to_velocity
+from processing.metrics import rms, magnitude_mm_s
 
 kf = Kalman1D(q_signal=1e-3, q_bias=1e-5, r_measure=5e-3)
+
 
 def process_sample(acc_raw: np.ndarray, dt: float) -> tuple[np.ndarray, float, float]:
     s_corr, bias = kf.update(float(acc_raw))

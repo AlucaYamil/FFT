@@ -10,9 +10,12 @@ def card(title: str, body, color="primary", icon=None):
         header.append(html.I(className=f"bi bi-{icon} me-2"))
     header.append(html.Span(title))
     return dbc.Card(
-        [dbc.CardHeader(html.Div(header, className="d-flex align-items-center")),
-         dbc.CardBody(body)],
-        color=color, className="shadow-sm h-100",
+        [
+            dbc.CardHeader(html.Div(header, className="d-flex align-items-center")),
+            dbc.CardBody(body),
+        ],
+        color=color,
+        className="shadow-sm h-100",
     )
 
 
@@ -21,32 +24,69 @@ layout = dbc.Container(
         # --- Señales en tiempo ---
         dbc.Row(
             [
-                dbc.Col(card("Acc (m/s²)", dcc.Graph(id="accel-graph"), "info", "speedometer2"), width=6),
-                dbc.Col(card("Vel (mm/s)", dcc.Graph(id="waveform"),    "secondary", "tachometer"),      width=6),
+                dbc.Col(
+                    card(
+                        "Acc (m/s²)",
+                        dcc.Graph(id="accel-graph"),
+                        "info",
+                        "speedometer2",
+                    ),
+                    width=6,
+                ),
+                dbc.Col(
+                    card(
+                        "Vel (mm/s)",
+                        dcc.Graph(id="waveform"),
+                        "secondary",
+                        "tachometer",
+                    ),
+                    width=6,
+                ),
             ],
             className="mb-4",
         ),
-
         # --- FFT y tendencia RMS ---
         dbc.Row(
             [
-                dbc.Col(card("FFT", dcc.Graph(id="spectrum"), "warning", "graph-up"), width=6),
-                dbc.Col(card("RMS – Histórico", dcc.Graph(id="rms-trend"), "danger", "activity"), width=6),
+                dbc.Col(
+                    card("FFT", dcc.Graph(id="spectrum"), "warning", "graph-up"),
+                    width=6,
+                ),
+                dbc.Col(
+                    card(
+                        "RMS – Histórico",
+                        dcc.Graph(id="rms-trend"),
+                        "danger",
+                        "activity",
+                    ),
+                    width=6,
+                ),
             ],
             className="mb-4",
         ),
-
         # --- Indicadores numéricos (IDs deben coincidir con callbacks) ---
         dbc.Row(
             [
-                dbc.Col(card("RMS actual (mm/s)", html.H4(id="rms-val"),  color="danger"),    width=3),
-                dbc.Col(card("Frecuencia pico (Hz)", html.H4(id="peak-val"), color="warning"), width=3),
-                dbc.Col(card("RMS instantáneo", html.H4(id="inst-val"), color="info"),        width=3),
-                dbc.Col(card("Zona ISO", html.H4(id="diag-val"),     color="success"),     width=3),
+                dbc.Col(
+                    card("RMS actual (mm/s)", html.H4(id="rms-val"), color="danger"),
+                    width=3,
+                ),
+                dbc.Col(
+                    card(
+                        "Frecuencia pico (Hz)", html.H4(id="peak-val"), color="warning"
+                    ),
+                    width=3,
+                ),
+                dbc.Col(
+                    card("RMS instantáneo", html.H4(id="inst-val"), color="info"),
+                    width=3,
+                ),
+                dbc.Col(
+                    card("Zona ISO", html.H4(id="diag-val"), color="success"), width=3
+                ),
             ],
             className="mb-4",
         ),
-
         # --- Panel de configuración ---
         dbc.Row(
             dbc.Col(
@@ -54,7 +94,13 @@ layout = dbc.Container(
                     dbc.CardBody(
                         [
                             html.Label("RPM"),
-                            dbc.Input(id="rpm-input", type="number", value=1390, min=0, step=10),
+                            dbc.Input(
+                                id="rpm-input",
+                                type="number",
+                                value=1390,
+                                min=0,
+                                step=10,
+                            ),
                             html.Br(),
                             html.Label("Grupo ISO"),
                             dbc.Select(
@@ -73,7 +119,6 @@ layout = dbc.Container(
             ),
             className="mb-4",
         ),
-
         dcc.Interval(id="interval", interval=500, n_intervals=0),
     ],
     fluid=True,
