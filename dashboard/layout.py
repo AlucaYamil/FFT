@@ -36,7 +36,7 @@ layout = dbc.Container(
                 dbc.Col(
                     card(
                         "Vel (mm/s)",
-                        dcc.Graph(id="waveform"),
+                        dcc.Graph(id="vibration-graph"),
                         "secondary",
                         "tachometer",
                     ),

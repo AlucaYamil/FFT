@@ -56,7 +56,7 @@ def start_acquisition() -> None:
 @callback(
     [
         Output("accel-graph", "figure"),
-        Output("waveform", "figure"),
+        Output("vibration-graph", "figure"),
         Output("spectrum", "figure"),
         Output("rms-trend", "figure"),
         Output("rms-val", "children"),
