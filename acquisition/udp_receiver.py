@@ -1,8 +1,13 @@
+import logging
 import socket
 import struct
+
 import numpy as np
+
 from settings import HW
 from processing.integration import accel_to_vel_rms
+
+logger = logging.getLogger(__name__)
 FS_HZ = HW.SAMPLE_RATE
 
 
@@ -11,8 +16,9 @@ def setup_udp(ip: str, port: int, timeout: float = 0.2):
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind((ip, port))
     sock.settimeout(timeout)
-    print(f"[listener_udp] escuchando en puerto {port}…")
+    logger.debug("[listener_udp] escuchando en puerto %s…", port)
     return sock
+
 
 def receive_batch(sock):
     """
@@ -22,37 +28,40 @@ def receive_batch(sock):
     """
     try:
         data, addr = sock.recvfrom(4096)
-        print(f"[receive_batch] {len(data)} bytes from {addr}")
+        logger.debug("[receive_batch] %d bytes from %s", len(data), addr)
         if len(data) < 4:
-            print("[receive_batch] paquete muy corto")
+            logger.debug("[receive_batch] paquete muy corto")
             return None, None
-        #Nuevo Bloque
         seq, n = struct.unpack_from("<HH", data, 0)
         expected_bytes = 4 + n * 6
-        
+
         if len(data) != expected_bytes:
-            print(f"[receive_batch] ⚠️ tamaño incoherente: "
-          f"esperado {expected_bytes} bytes, llegó {len(data)}")
+            logger.debug(
+                "[receive_batch] ⚠️ tamaño incoherente: esperado %d bytes, llegó %d",
+                expected_bytes,
+                len(data),
+            )
             return None, None
         raw = np.frombuffer(data, dtype="<i2", offset=4)
         raw = raw.reshape(n, 3)
 
         vel_rms = accel_to_vel_rms(raw, fs=FS_HZ)
-        print(f"[receive_batch] seq={seq}  n={n}  rms={vel_rms:.3f} mm/s")
-        # Fin De Bloque     
-        
-        seq = struct.unpack_from('<I', data, 0)[0]
+        logger.debug("[receive_batch] seq=%d  n=%d  rms=%.3f mm/s", seq, n, vel_rms)
+        seq = struct.unpack_from("<I", data, 0)[0]
         payload = data[4:]
         if len(payload) % 6 != 0:
-            print(f"[receive_batch] payload len {len(payload)} no es múltiplo de 6")
+            logger.debug(
+                "[receive_batch] payload len %d no es múltiplo de 6",
+                len(payload),
+            )
             return seq, None
         count = len(payload) // 2
-        vals = struct.unpack('<' + 'h'*count, payload)
+        vals = struct.unpack("<" + "h" * count, payload)
         raw = np.array(vals, dtype=np.int16).reshape(-1, 3)
-        print(f"[receive_batch] parsed raw.shape = {raw.shape}")
+        logger.debug("[receive_batch] parsed raw.shape = %s", raw.shape)
         return seq, raw
     except socket.timeout:
         return None, None
     except Exception as e:
-        print(f"[receive_batch] excepción: {e}")
+        logger.debug("[receive_batch] excepción: %s", e)
         return None, None
