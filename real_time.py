@@ -14,14 +14,14 @@ Para ejecutar en paralelo al dashboard:
     python real_time.py
 
 Requisitos:
-- numpy, pandas, scipy, y que data_generator.py, conversion.py, signal_processing.py
+- numpy, pandas, scipy, y que 
   y fft_analysis.py estén en la misma carpeta.
 """
 
 import time
 import pandas as pd
+import numpy as np
 
-from data_generator       import simulate_vibration_data
 from conversion           import acc_to_velocity
 from signal_processing    import bandpass_filter, apply_hanning_window
 from fft_analysis         import compute_fft
@@ -39,8 +39,8 @@ def main():
     """
     bloque_id = 0
     while True:
-        # 1) Generar bloque de aceleración (g)
-        accel = simulate_vibration_data(duration=DURATION, fs=FS)
+        # 1) Obtener bloque de aceleración (reemplazar con captura real)
+        accel = np.zeros((int(DURATION * FS), 3))
 
         # 2) Convertir a velocidad (mm/s)
         vel = acc_to_velocity(accel, FS)
@@ -70,3 +70,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
