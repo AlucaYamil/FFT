@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import numpy as np
 
-from data_generator import simulate_vibration_data
 from conversion import acc_to_velocity
 from signal_processing import bandpass_filter, apply_hanning_window
 from fft_analysis import compute_fft
@@ -34,8 +33,8 @@ fs = 800        # Hz
 
 def main() -> None:
     """Ejecutar el pipeline completo de análisis de vibraciones."""
-    # Generar aceleración simulada
-    accel = simulate_vibration_data(duration=duration, fs=fs)
+    # Datos de aceleración de entrada (reemplazar con captura real)
+    accel = np.zeros((int(duration * fs), 3))
     print(f"[1] Datos de aceleración generados: {accel.shape[0]} muestras")
     save_acceleration_csv(accel, fs, "raw_acc.csv")
     print("    • raw_acc.csv guardado")
