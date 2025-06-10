@@ -17,7 +17,8 @@ Luego abrir el navegador en http://127.0.0.1:8050/
 """
 
 import dash
-from dash import html, dcc, Output, Input
+from dash import html, dcc, Output, Input, no_update
+import os
 import pandas as pd
 import plotly.graph_objs as go
 
@@ -36,7 +37,7 @@ app.layout = html.Div(
         # Gráfico de velocidad en el tiempo
         html.Div([
             html.H2("Señal de Velocidad (mm/s)"),
-            dcc.Graph(id="live-velocity-graph"),
+            dcc.Graph(id="vibration-graph"),
         ], style={"margin-bottom": "40px"}),
 
         # Gráfico del espectro FFT
@@ -56,7 +57,7 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output("live-velocity-graph", "figure"),
+    Output("vibration-graph", "figure"),
     Output("live-fft-graph", "figure"),
     Input("interval-component", "n_intervals")
 )
@@ -68,98 +69,78 @@ def update_graphs(n):
         1) velocity_fig: gráfico de líneas de vx, vy, vz vs. time.
         2) fft_fig: gráfico de líneas de amp_x, amp_y, amp_z vs. frequency.
     """
-    # 1) Leer CSV de velocidad
-    try:
+    # 1) Leer CSV de velocidad si existe
+    if os.path.exists("velocity.csv"):
         df_vel = pd.read_csv("velocity.csv")
-    except Exception:
-        empty_fig = go.Figure()
-        empty_fig.update_layout(
-            title="No se encontró velocity.csv",
-            xaxis_title="time (s)",
-            yaxis_title="velocity (mm/s)"
-        )
-        return empty_fig, empty_fig
+    else:
+        print("[WARN] velocity.csv no encontrado")
+        df_vel = None
 
-    # 2) Leer CSV de FFT
-    try:
+    # 2) Leer CSV de FFT si existe
+    if os.path.exists("fft_result.csv"):
         df_fft = pd.read_csv("fft_result.csv")
-    except Exception:
-        empty_fig = go.Figure()
-        empty_fig.update_layout(
-            title="No se encontró fft_result.csv",
-            xaxis_title="frequency (Hz)",
-            yaxis_title="amplitude (mm/s)"
-        )
+    else:
+        print("[WARN] fft_result.csv no encontrado")
+        df_fft = None
+
+    if df_vel is not None:
         velocity_fig = go.Figure()
         velocity_fig.add_trace(go.Scatter(
-            x=df_vel["time"], y=df_vel["vx"], mode="lines", name="Vx"
+            x=df_vel["time"],
+            y=df_vel["vx"],
+            mode="lines",
+            name="Vx"
         ))
         velocity_fig.add_trace(go.Scatter(
-            x=df_vel["time"], y=df_vel["vy"], mode="lines", name="Vy"
+            x=df_vel["time"],
+            y=df_vel["vy"],
+            mode="lines",
+            name="Vy"
         ))
         velocity_fig.add_trace(go.Scatter(
-            x=df_vel["time"], y=df_vel["vz"], mode="lines", name="Vz"
+            x=df_vel["time"],
+            y=df_vel["vz"],
+            mode="lines",
+            name="Vz"
         ))
         velocity_fig.update_layout(
+            title="Velocidad vs Tiempo",
             xaxis_title="Tiempo (s)",
             yaxis_title="Velocidad (mm/s)",
             margin={"l": 40, "r": 10, "t": 40, "b": 40}
         )
-        return velocity_fig, empty_fig
-
-    # --- Construir figura de velocidad ---
-    velocity_fig = go.Figure()
-    velocity_fig.add_trace(go.Scatter(
-        x=df_vel["time"],
-        y=df_vel["vx"],
-        mode="lines",
-        name="Vx"
-    ))
-    velocity_fig.add_trace(go.Scatter(
-        x=df_vel["time"],
-        y=df_vel["vy"],
-        mode="lines",
-        name="Vy"
-    ))
-    velocity_fig.add_trace(go.Scatter(
-        x=df_vel["time"],
-        y=df_vel["vz"],
-        mode="lines",
-        name="Vz"
-    ))
-    velocity_fig.update_layout(
-        title="Velocidad vs Tiempo",
-        xaxis_title="Tiempo (s)",
-        yaxis_title="Velocidad (mm/s)",
-        margin={"l": 40, "r": 10, "t": 40, "b": 40}
-    )
+    else:
+        velocity_fig = no_update
 
     # --- Construir figura de FFT ---
-    fft_fig = go.Figure()
-    fft_fig.add_trace(go.Scatter(
-        x=df_fft["frequency"],
-        y=df_fft["amp_x"],
-        mode="lines",
-        name="Amp X"
-    ))
-    fft_fig.add_trace(go.Scatter(
-        x=df_fft["frequency"],
-        y=df_fft["amp_y"],
-        mode="lines",
-        name="Amp Y"
-    ))
-    fft_fig.add_trace(go.Scatter(
-        x=df_fft["frequency"],
-        y=df_fft["amp_z"],
-        mode="lines",
-        name="Amp Z"
-    ))
-    fft_fig.update_layout(
-        title="Espectro FFT",
-        xaxis_title="Frecuencia (Hz)",
-        yaxis_title="Amplitud (mm/s)",
-        margin={"l": 40, "r": 10, "t": 40, "b": 40}
-    )
+    if df_fft is not None:
+        fft_fig = go.Figure()
+        fft_fig.add_trace(go.Scatter(
+            x=df_fft["frequency"],
+            y=df_fft["amp_x"],
+            mode="lines",
+            name="Amp X"
+        ))
+        fft_fig.add_trace(go.Scatter(
+            x=df_fft["frequency"],
+            y=df_fft["amp_y"],
+            mode="lines",
+            name="Amp Y"
+        ))
+        fft_fig.add_trace(go.Scatter(
+            x=df_fft["frequency"],
+            y=df_fft["amp_z"],
+            mode="lines",
+            name="Amp Z"
+        ))
+        fft_fig.update_layout(
+            title="Espectro FFT",
+            xaxis_title="Frecuencia (Hz)",
+            yaxis_title="Amplitud (mm/s)",
+            margin={"l": 40, "r": 10, "t": 40, "b": 40}
+        )
+    else:
+        fft_fig = no_update
 
     return velocity_fig, fft_fig
 

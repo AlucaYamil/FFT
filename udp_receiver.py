@@ -18,6 +18,8 @@ SAMPLE_FMT     = "<" + "hhh" * BATCH_SIZE  # (x:int16, y:int16, z:int16) × 16
 HEADER_SIZE    = struct.calcsize(HEADER_FMT)      # 4 bytes
 SAMPLES_SIZE   = struct.calcsize("hhh") * BATCH_SIZE  # 6 bytes × 16 = 96 bytes
 PACKET_SIZE    = HEADER_SIZE + SAMPLES_SIZE       # 100 bytes
+# Esperamos exactamente 100 bytes por paquete:
+#   <seq:uint16><count:uint16><16*(x:int16,y:int16,z:int16)>
 
 # CSV de salida donde se van a agregar las muestras (modo append)
 OUTPUT_CSV         = "simulated_data.csv"
@@ -100,8 +102,10 @@ class UDPReceiver:
 
                 # Validar tamaño de paquete
                 if len(packet) != PACKET_SIZE:
-                    print(f"[WARNING] Tamaño incorrecto: {len(packet)} bytes. Esperados: {PACKET_SIZE}. Ignorando paquete.")
-                    continue
+                    raise ValueError(
+                        f"Paquete UDP {len(packet)} bytes – esperado {PACKET_SIZE}. "
+                        "Verifica que el firmware envíe <seq:uint16><cnt:uint16><16*(x,y,z:int16)>"
+                    )
 
                 # Desempaquetar cabecera (seq, count)
                 try:
