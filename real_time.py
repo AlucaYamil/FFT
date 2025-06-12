@@ -23,8 +23,11 @@ import pandas as pd
 import numpy as np
 
 from conversion           import acc_to_velocity
-from signal_processing    import bandpass_filter, apply_hanning_window
-from fft_analysis         import compute_fft
+from signal_processing    import (
+    bandpass_filter,
+    apply_hanning_window,
+    compute_fft,
+)
 from storage              import save_velocity_csv, save_fft_csv
 
 # Parámetros de “streaming”

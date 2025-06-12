@@ -18,8 +18,11 @@ from __future__ import annotations
 import numpy as np
 
 from conversion import acc_to_velocity
-from signal_processing import bandpass_filter, apply_hanning_window
-from fft_analysis import compute_fft
+from signal_processing import (
+    bandpass_filter,
+    apply_hanning_window,
+    compute_fft,
+)
 from storage import (
     save_acceleration_csv,
     save_velocity_csv,
@@ -44,28 +47,3 @@ def main() -> None:
     print("[2] Conversión a velocidad completada")
     save_velocity_csv(vel, fs, "velocity.csv")
     print("    • velocity.csv guardado")
-
-    # Procesamiento de señal: filtrado + ventana
-    filtered = bandpass_filter(vel, fs)
-    windowed = apply_hanning_window(filtered)
-    print("[3] Filtrado pasabanda y ventana aplicados")
-
-    # Calcular FFT
-    freqs, amps = compute_fft(windowed, fs)
-    print("[4] FFT calculada")
-
-    # Mostrar frecuencia dominante por eje
-    for eje, etiqueta in enumerate(("X", "Y", "Z")):
-        idx = np.argmax(amps[:, eje])
-        print(
-            f"      → Eje {etiqueta}: {freqs[idx]:.2f} Hz, "
-            f"amplitud {amps[idx, eje]:.4f} mm/s"
-        )
-
-    save_fft_csv(freqs, amps, "fft_result.csv")
-    print("    • fft_result.csv guardado")
-    print("Proceso completo finalizado")
-
-
-if __name__ == "__main__":
-    main()

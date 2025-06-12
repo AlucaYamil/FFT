@@ -81,46 +81,7 @@ es extraer el espectro de frecuencias (positivas) y sus amplitudes para cada eje
 """
 
 import numpy as np
-
-
-def compute_fft(signal: np.ndarray, fs: int) -> tuple[np.ndarray, np.ndarray]:
-    """Calcula la FFT de una señal tri-axial y devuelve frecuencias positivas y
-    sus amplitudes normalizadas.
-
-    Parámetros
-    ----------
-    signal : np.ndarray, shape (N, 3)
-        Señal temporal en mm/s para ejes X, Y, Z.
-    fs : int
-        Frecuencia de muestreo en Hz.
-
-    Devuelve
-    -------
-    tuple[np.ndarray, np.ndarray]
-        ``freqs`` con las frecuencias positivas y ``amps`` con las magnitudes
-        normalizadas por eje.
-
-    Notas
-    -----
-    - La amplitud se normaliza con factor ``2/N`` excepto para la componente DC
-      y, si corresponde, la frecuencia de Nyquist.
-    """
-    if signal.ndim != 2 or signal.shape[1] != 3:
-        raise ValueError("signal debe ser un array de forma (N, 3)")
-
-    N = signal.shape[0]
-    freqs = np.fft.rfftfreq(N, 1.0 / fs)
-    amps = np.zeros((freqs.size, 3), dtype=float)
-
-    for axis in range(3):
-        Y = np.fft.rfft(signal[:, axis])
-        mag = np.abs(Y) * (2.0 / N)
-        mag[0] = np.abs(Y[0]) / N
-        if N % 2 == 0:
-            mag[-1] = np.abs(Y[-1]) / N
-        amps[:, axis] = mag
-
-    return freqs, amps
+from signal_processing import compute_fft
 
 
 if __name__ == "__main__":

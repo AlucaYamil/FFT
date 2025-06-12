@@ -160,22 +160,24 @@ def save_fft_csv(freqs: np.ndarray, amps: np.ndarray, filename: str) -> None:
 
 if __name__ == "__main__":
     # Prueba rápida del módulo
-    from data_generator import simulate_vibration_data
+    #from data_generator import simulate_vibration_data
     from conversion import acc_to_velocity
-    from signal_processing import bandpass_filter, apply_hanning_window
-    from fft_analysis import compute_fft
+    from signal_processing import (
+        bandpass_filter,
+        apply_hanning_window,
+        compute_fft,
+    )
 
     duration = 1.0
     fs = 800
-    accel = simulate_vibration_data(duration, fs)
-    save_acceleration_csv(accel, fs, "raw_acc.csv")
+    #accel = simulate_vibration_data(duration, fs)
+    #save_acceleration_csv(accel, fs, "raw_acc.csv")
+    #velocity = acc_to_velocity(accel, fs)
+    #save_velocity_csv(velocity, fs, "velocity.csv")
 
-    velocity = acc_to_velocity(accel, fs)
-    save_velocity_csv(velocity, fs, "velocity.csv")
-
-    filtered = bandpass_filter(velocity, fs)
-    windowed = apply_hanning_window(filtered)
-    freqs, amps = compute_fft(windowed, fs)
-    save_fft_csv(freqs, amps, "fft.csv")
+    #filtered = bandpass_filter(velocity, fs)
+    #windowed = apply_hanning_window(filtered)
+    #freqs, amps = compute_fft(windowed, fs)
+    #save_fft_csv(freqs, amps, "fft.csv")
 
     print("Archivos CSV generados correctamente.")
