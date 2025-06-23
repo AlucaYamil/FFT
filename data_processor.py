@@ -7,6 +7,7 @@ from conversion import acc_to_velocity
 from signal_processing import apply_hanning_window, compute_rms, compute_fft
 
 FS = 800
+ACC_LSB_TO_G = 0.004  # Sensibilidad del ADXL345 en rango ±2g
 
 HOST = ""          # 0.0.0.0  → todas las interfaces
 PORT = 5005
@@ -28,7 +29,8 @@ while True:
     samples = struct.iter_unpack(fmt_block, data[4:])
     arr = np.array(list(samples), dtype=np.int16)
 
-    vel = acc_to_velocity(arr.astype(float), FS)
+    accel_g = arr.astype(float) * ACC_LSB_TO_G
+    vel = acc_to_velocity(accel_g, FS)
 
     for sample in vel:
         if calibration.capturing:

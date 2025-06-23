@@ -14,6 +14,7 @@ from signal_processing import apply_hanning_window, compute_fft, compute_rms
 from calibration import calibration
 
 FS = 800
+ACC_LSB_TO_G = 0.004  # Sensibilidad del ADXL345 en rango ±2g
 BUFFER = np.zeros((FS, 3), dtype=float)
 
 app = dash.Dash(__name__)
@@ -37,13 +38,13 @@ app.layout = html.Div(
     ]
 )
 
-
 def _process_packet() -> np.ndarray:
     try:
         _, data = get_packet(timeout=0.05)
     except socket.timeout:
         return np.zeros((0, 3))
-    vel = acc_to_velocity(data.astype(float), FS)
+    accel_g = data.astype(float) * ACC_LSB_TO_G
+    vel = acc_to_velocity(accel_g, FS)
     for sample in vel:
         if calibration.capturing:
             calibration.add_sample(sample)
@@ -51,7 +52,6 @@ def _process_packet() -> np.ndarray:
         calibration.compute_offset()
     vel -= calibration.offset
     return vel
-
 
 @app.callback(
     Output("time-graph", "figure"),
@@ -83,7 +83,6 @@ def update_signals(_, rms_history):
 
     return fig_time, fig_fft, rms_history
 
-
 @app.callback(Output("rms-graph", "figure"), Input("rms-store", "data"))
 def draw_rms(data):
     fig = go.Figure()
@@ -94,7 +93,6 @@ def draw_rms(data):
             fig.add_trace(go.Scatter(x=x, y=arr[:, i], mode="lines", name=axis))
     fig.update_layout(xaxis_title="Iteración", yaxis_title="RMS (mm/s)")
     return fig
-
 
 @app.callback(
     Output("btn-cal", "disabled"),
@@ -118,10 +116,8 @@ def manage_controls(cal_clicks, stop_clicks, _):
         return False
     return calibration.capturing
 
-
 def run_dashboard():
     app.run(debug=True)
-
 
 if __name__ == "__main__":
     run_dashboard()
